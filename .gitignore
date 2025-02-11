@@ -28,26 +28,27 @@ render.experimental.xml
 
 # Google Services (e.g. APIs or Firebase)
 google-services.json
+firebase/
+google-services.json
 
 # Android Profiling
 *.hprof
 
-# Flutter related files
+# Sensitive Flutter related files
 .flutter/
 .dart_tool/
-.packages
 .pub/
 build/
-.flutter-plugins
 .flutter-plugins-dependencies
-.flutter-version
-.flutter_environment
+
+# Sensitive configuration files
 .vscode/
 .idea/
 *.iml
 
-# Flutter specific files
+# Flutter generated files
+.packages
 *.lock
 *.log
-*.flutter-plugins-dependencies
+.flutter-plugins-dependencies
 .flutter_tool/
