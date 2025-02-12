@@ -1,0 +1,35 @@
+{
+    "name": "thread_swap",
+    "short_name": "thread_swap",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": ""ThreadSwap is your go-to fashion rental app, offering a seamless way to borrow and swap stylish clothing for every occasion. Whether you're looking to refresh your wardrobe or find the perfect outfit for a special event, ThreadSwap lets you explore a wide range of trendy, high-quality garments—all without the commitment of a full purchase. Swap, rent, and elevate your style effortlessly with ThreadSwap!"",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-maskable-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "maskable"
+        },
+        {
+            "src": "icons/Icon-maskable-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1009905627543",
+    "project_id": "threasswap-firebase",
+    "storage_bucket": "threasswap-firebase.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1009905627543:android:b1860a38e87b6cb74a54d2",
+        "android_client_info": {
+          "package_name": "com.example.threadswap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxk0hOx-540T0S8H2KcrGI9b9OwcHMaRQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
