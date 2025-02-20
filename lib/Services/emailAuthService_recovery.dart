@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -19,23 +20,11 @@ class AuthService {
     }
   }
 
-  // SignUp function
-  // Future<UserCredential> signUp(String email, String password) async {
-  //   try {
-  //     final UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-  //       email: email,
-  //       password: password,
-  //     );
-  //     print("Signed up: ${userCredential.user?.email}");
-  //     return userCredential;
-  //   } catch (e) {
-  //     throw Exception("SignUp failed: $e");
-  //   }
-  // }
+
 
   // SignUp function
   Future<UserCredential> signUp(
-      String email, String password, String name) async {
+      String email, String password, String name , BuildContext context) async {
     try {
       final UserCredential userCredential =
           await _auth.createUserWithEmailAndPassword(
@@ -53,6 +42,52 @@ class AuthService {
     } catch (e) {
       throw Exception("SignUp failed: $e");
     }
+  }
+
+  // Future<UserCredential> signUp(
+  //     String email, String password, String name, BuildContext context) async {
+  //   try {
+  //     // First, create the user with email and password
+  //     final UserCredential userCredential =
+  //     await _auth.createUserWithEmailAndPassword(
+  //       email: email,
+  //       password: password,
+  //     );
+  //
+  //     // Update the user's profile with their name
+  //     await userCredential.user?.updateProfile(displayName: name);
+  //
+  //     // Send the email verification
+  //     await userCredential.user?.sendEmailVerification();
+  //
+  //     print(
+  //         "Signed up: ${userCredential.user?.email}, Name: ${userCredential.user?.displayName}");
+  //
+  //     // Inform the user that they need to verify their email
+  //     _showInfoDialog("A verification email has been sent. Please verify your email before logging in.", context);
+  //
+  //     return userCredential;
+  //   } catch (e) {
+  //     throw Exception("SignUp failed: $e");
+  //   }
+  // }
+
+  void _showInfoDialog(String message, BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Info"),
+        content: Text(message),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text("OK"),
+          ),
+        ],
+      ),
+    );
   }
 
   // Password recovery function

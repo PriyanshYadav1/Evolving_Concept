@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,6 +36,7 @@ class HomePage_State extends State<Home_Page> {
     // TODO: implement initState
     super.initState();
     loadUser();
+    User? user = FirebaseAuth.instance.currentUser;
   }
 
   Future<void> loadUser() async {

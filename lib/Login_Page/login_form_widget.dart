@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:threadswap/Dashboard/dashboard_Screen.dart';
@@ -22,6 +23,42 @@ class _LoginFormState extends State<LoginForm> {
   TextEditingController? Email;
   TextEditingController? Passsword;
 
+  // void _login() async {
+  //   setState(() {
+  //     _isLoading = true; // Show the progress indicator
+  //   });
+  //
+  //
+  //   // Check if Email and Password are not null and not empty
+  //   if (Email != null &&
+  //       Passsword != null &&
+  //       Email!.text.isNotEmpty &&
+  //       Passsword!.text.isNotEmpty) {
+  //     try {
+  //       await AuthService().login(Email!.text, Passsword!.text);
+  //
+  //       // Navigate to home screen if login is successful
+  //       Navigator.pushReplacement(context,
+  //           MaterialPageRoute(builder: (context) => Dashboard_Screen()));
+  //
+  //       setState(() {
+  //         _isLoading = false; // Hide the progress indicator
+  //       });
+  //     } catch (e) {
+  //       setState(() {
+  //         _isLoading = false; // Hide the progress indicator
+  //       });
+  //       // Show a dialog with the error message when login fails
+  //       _showErrorDialog(e.toString());
+  //     }
+  //   } else {
+  //     setState(() {
+  //       _isLoading = false; // Hide the progress indicator
+  //     });
+  //     _showErrorDialog("Fields cannot be empty");
+  //   }
+  // }
+
   void _login() async {
     setState(() {
       _isLoading = true; // Show the progress indicator
@@ -33,11 +70,27 @@ class _LoginFormState extends State<LoginForm> {
         Email!.text.isNotEmpty &&
         Passsword!.text.isNotEmpty) {
       try {
-        await AuthService().login(Email!.text, Passsword!.text);
+        // Attempt to login using AuthService
+        UserCredential userCredential =
+            await AuthService().login(Email!.text, Passsword!.text);
 
-        // Navigate to home screen if login is successful
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => Dashboard_Screen()));
+        // Get the logged-in user from userCredential
+        User? user = userCredential.user;
+
+        // Check if the user's email is verified
+        if (user != null && user.emailVerified) {
+          // Navigate to home screen if email is verified
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Dashboard_Screen()),
+          );
+        } else {
+          // Email is not verified, show dialog and send a verification email
+          await user?.sendEmailVerification();
+          _showErrorDialog(
+            "Your email is not verified. Please check your inbox and verify your email before logging in.",
+          );
+        }
 
         setState(() {
           _isLoading = false; // Hide the progress indicator
@@ -55,6 +108,40 @@ class _LoginFormState extends State<LoginForm> {
       });
       _showErrorDialog("Fields cannot be empty");
     }
+  }
+
+  void _showVerificationDialog(User? user) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Email Not Verified"),
+        content: Text(
+            "Please verify your email address before logging in. Do you want to resend the verification email?"),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () async {
+              // Resend the verification email
+              try {
+                await user?.sendEmailVerification();
+                Navigator.of(ctx).pop();
+                _showInfoDialog(
+                    "A new verification email has been sent to your email address.");
+              } catch (e) {
+                Navigator.of(ctx).pop();
+                _showErrorDialog("Failed to send verification email: $e");
+              }
+            },
+            child: Text("Resend Email"),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text("Cancel"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -76,6 +163,24 @@ class _LoginFormState extends State<LoginForm> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text("Login Failure"),
+        content: Text(errorMessage),
+        actions: <Widget>[
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+            },
+            child: Text("OK"),
+          )
+        ],
+      ),
+    );
+  }
+
+  void _showInfoDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text("Info"),
         content: Text(errorMessage),
         actions: <Widget>[
           TextButton(

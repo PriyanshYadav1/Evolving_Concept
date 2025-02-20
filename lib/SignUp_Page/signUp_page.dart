@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_email_sender/flutter_email_sender.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:threadswap/Login_Page/login_screen.dart';
 import 'package:threadswap/Services/emailAuthService_recovery.dart';
@@ -20,11 +19,14 @@ class SignUpForm extends StatefulWidget {
 class _SignUpFormState extends State<SignUpForm> {
   bool _obscureText1 = true;
   bool _obscureText2 = true;
+  bool _isLoading = false;
 
   TextEditingController? Email;
   TextEditingController? Passsword;
   TextEditingController? Confirm_Passsword;
   TextEditingController? Name;
+
+  String _passwordStrengthMessage = "Enter a password to check its strength.";
 
   @override
   void initState() {
@@ -50,38 +52,39 @@ class _SignUpFormState extends State<SignUpForm> {
   // String userName = userCredential.user?.displayName ?? "No name provided";
   // print("User name: $userName");
 
-  void _signUpUser(BuildContext context, String email, String password, String name) async {
+  void _signUpUser(
+      BuildContext context, String email, String password, String name) async {
+    setState(() {
+      _isLoading = true; // Start loading when the sign-up is triggered
+    });
+
     try {
       AuthService authService = AuthService();
       UserCredential userCredential =
-          await authService.signUp(email, password, name);
-      // Handle successful sign-up
-      Fluttertoast.showToast(
-          msg: "Signed up successfully",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
-      print("Signed up successfully: ${userCredential.user?.email}, Name: ${userCredential.user?.displayName}");
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Login_Screen() ));
+          await authService.signUp(email, password, name, context);
+      _postToast("Logged in successfully!");
+      Navigator.pushReplacement(
+          context, MaterialPageRoute(builder: (context) => Login_Screen()));
     } catch (e) {
-      // Handle error (e.g., show a dialog or message to the user)
-      print("Sign up failed: $e");
-      Fluttertoast.showToast(
-          msg: "Sign up failed: $e",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          timeInSecForIosWeb: 1,
-          backgroundColor: Colors.black,
-          textColor: Colors.white,
-          fontSize: 16.0
-      );
+      _postToast("Sign up failed: $e");
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading when the sign-up process ends
+      });
     }
   }
 
+  void _postToast(String message) {
+    Fluttertoast.showToast(
+      msg: message,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      timeInSecForIosWeb: 1,
+      backgroundColor: Colors.black,
+      textColor: Colors.white,
+      fontSize: 16.0,
+    );
+  }
 
   void _showErrorDialog(String errorMessage) {
     showDialog(
@@ -99,6 +102,38 @@ class _SignUpFormState extends State<SignUpForm> {
         ],
       ),
     );
+  }
+
+  // Function to check password strength
+  bool isPasswordStrong(String password) {
+    // Check for minimum length of 8 characters
+    if (password.length < 8) {
+      return false;
+    }
+
+    // Check if it contains at least one uppercase letter
+    bool hasUppercase = password.contains(RegExp(r'[A-Z]'));
+
+    // Check if it contains at least one uppercase letter
+    bool hasNumber = password.contains(RegExp(r'[0-9]'));
+
+    // Check if it contains at least one special character
+    bool hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+
+    // Return true if both conditions are satisfied
+    return hasUppercase && hasSpecialChar && hasNumber;
+  }
+
+  // Function to update the password strength message
+  void updatePasswordStrength(String password) {
+    setState(() {
+      if (isPasswordStrong(password)) {
+        _passwordStrengthMessage = "Password is strong!";
+      } else {
+        _passwordStrengthMessage =
+            "Password is weak. Ensure it's at least 8 characters, contains an uppercase letter, and a special character.";
+      }
+    });
   }
 
   @override
@@ -199,6 +234,10 @@ class _SignUpFormState extends State<SignUpForm> {
                               const SizedBox(height: 20),
                               TextFormField(
                                 controller: Passsword,
+                                onChanged: (value) {
+                                  updatePasswordStrength(value);
+                                  ;
+                                },
                                 obscureText: _obscureText1,
                                 // Hide the text if true
                                 decoration: InputDecoration(
@@ -238,7 +277,15 @@ class _SignUpFormState extends State<SignUpForm> {
                                   ),
                                 ),
                               ),
-                              const SizedBox(height: 20),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  _passwordStrengthMessage,
+                                  style: TextStyle(
+                                      fontSize: 13, color: Colors.red),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
                               TextFormField(
                                 controller: Confirm_Passsword,
                                 obscureText: _obscureText2,
@@ -288,37 +335,45 @@ class _SignUpFormState extends State<SignUpForm> {
                                 height: 50,
                                 child: OutlinedButton(
                                   onPressed: () {
-                                    if (Name?.text != null &&
-                                        Passsword?.text != null &&
-                                        Confirm_Passsword?.text != null &&
-                                        Email?.text != null) {
+                                    if (Name?.text.isNotEmpty == true &&
+                                        Passsword?.text.isNotEmpty == true &&
+                                        Confirm_Passsword?.text.isNotEmpty ==
+                                            true &&
+                                        Email?.text.isNotEmpty == true) {
                                       if (Passsword?.text ==
-                                          Confirm_Passsword?.text)
-                                          _signUpUser(context, Email!.text, Passsword!.text, Name!.text);
-                                      else {
-                                        var snackBar = SnackBar(
-                                          content:
-                                              Text('Passwords do not match.'),
-                                        );
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(snackBar);
+                                          Confirm_Passsword?.text) {
+                                        if (RegExp(
+                                                r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+                                            .hasMatch(Email!.text)) {
+                                          _signUpUser(context, Email!.text,
+                                              Passsword!.text, Name!.text);
+                                        } else {
+                                          _postToast(
+                                              'Please enter a valid email address.');
+                                        }
+                                      } else {
+                                        _postToast('Passwords do not match.');
                                       }
+                                    } else {
+                                      _postToast('All fields are required.');
                                     }
-                                    // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Dashboard_Screen() ));
                                   },
-                                  child: Text(
-                                    "Sign up",
-                                    style: TextStyle(color: Colors.black),
-                                  ),
+                                  child: _isLoading
+                                      ? LinearProgressIndicator(
+                                          color: Colors.black,
+                                        )
+                                      : Text(
+                                          "Sign up",
+                                          style: TextStyle(color: Colors.black),
+                                        ),
                                   style: OutlinedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     side: BorderSide(
-                                        color: Colors.grey,
-                                        width:
-                                            1), // Set the outline color to grey
+                                        color: Colors.grey, width: 1),
                                   ),
                                 ),
                               ),
+
                               // SizedBox(height: 45),
                               Align(
                                 alignment: Alignment.centerRight,
